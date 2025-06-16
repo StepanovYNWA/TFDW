@@ -1,0 +1,9 @@
+*.html text
+*.css text
+*.js text
+*.json text
+*.png binary
+*.jpg binary
+*.svg text
+*.md text
+LICENSE text
