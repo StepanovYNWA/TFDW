@@ -88,13 +88,15 @@
     height: 50%;
     opacity: 0.1;
   }
-  #topZone { top: 0; background: lightgreen; }
+  #topZone { top: 0; background: lightblue; }
   #bottomZone { bottom: 0; background: lightblue; }
 
   @media (max-width: 600px) {
     #startScreen h1 {
       font-size: 32px !important;
     }
+      #topZone { top: 0; background: lightgreen; }
+  #bottomZone { bottom: 0; background: lightblue; }
   }
 
   @keyframes winnerPulse {
