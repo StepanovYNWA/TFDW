@@ -8,25 +8,25 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "./icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "./icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "screenshots": [
     {
-      "src": "screenshots/screenshot1.png",
+      "src": "./screenshot1.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide"
     },
     {
-      "src": "screenshots/screenshot2.png",
+      "src": "./screenshot2.png",
       "sizes": "720x1280",
       "type": "image/png",
       "form_factor": "narrow"
