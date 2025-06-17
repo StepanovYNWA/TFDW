@@ -9,7 +9,6 @@
   }
     #startScreen h1 {
       font-size: 64px;
-      padding: 64px 0 64px 0;
     }
   button {
     background: black;
@@ -85,6 +84,7 @@
   @media (max-width: 600px) {
     #startScreen h1 {
       font-size: 32px !important;
+      padding: 24px 0 24px 0;
     }
       #topZone { top: 0; background: lightgreen; }
   #bottomZone { bottom: 0; background: lightblue; }
