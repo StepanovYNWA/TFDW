@@ -1,23 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>The Fastest Draw in the West</title>
-  <script src="main.js" defer></script>
-  <link rel="stylesheet" href="style.css" />
+<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>The Fastest Draw in the West</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: white;
+    font-family: sans-serif;
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  button {
+    align-self: stretch;
+    margin-left: 0;
+    background: black;
+    color: white;
+    border: 2px solid white;
+    border-radius: 48px;
+    font-size: 1.2em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    margin: 0.5em;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  button:hover {
+    transform: scale(1.05);
+  }
+  #helpModal, #winModal {
+    width: 400px;
+    height: auto;
+    padding: 32px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    border-radius: 16px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: black;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 10;
+    text-align: left;
+  }
+
+  #helpModal p, #winModal p {
+    line-height: 1.4;
+  }
+  #helpModal, #winModal {
+    background: white;
+    color: black;
+    display: none;
+  }
+  #gameScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  #numberDisplay {
+    z-index: 999;
+    position: absolute;
+    font-size: 5em;
+    font-weight: bold;
+  }
+  .score {
+    position: absolute;
+    padding: 0.5em 1em;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid white;
+    font-size: 1.2em;
+    border-radius: 48px;
+  }
+  #score1 { top: 10px; left: 10px; }
+  #score2 { bottom: 10px; right: 10px; }
+  #controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  .control-btn {
+    font-size: 1.5em;
+    margin-left: 0.5em;
+  }
+  .touchZone {
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    opacity: 0.1;
+  }
+  #topZone { top: 0; background: lightgreen; }
+  #bottomZone { bottom: 0; background: lightblue; }
+  
+    @keyframes winnerPulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.1); opacity: 0.7; }
+  }
+</style>
 </head>
 <body>
-  <div id="startScreen" style="position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-    <h1 style="font-size: 64px;">The Fastest Draw in the West</h1>
-    <img src="showdown.png" alt="Showdown" style="border-radius: 40px; max-width: 90%; height: auto; margin-top: 20px;">
-    <button onclick="startGame()" style="width: 200px; height: 64px; margin: 12px auto; display: block;">Старт</button>
-    <button onclick="showHelp()" style="width: 200px; height: 64px; margin: 12px auto; display: block;">Помощь</button>
-    <p style="position: absolute; bottom: 10px; font-size: 12px; color: rgba(255,255,255,0.4); width: 100%; text-align: center;">Development: <a href="https://www.instagram.com/stepanov.design/" target="_blank" style="color: rgba(255,255,255,0.4); text-decoration: underline; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Anton Stepanov</a>, 2025 ©</p>
+<div id="startScreen" style="position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+  <h1 style="font-size: 64px;">The Fastest Draw in the West</h1>
+  <img src="showdown.png" alt="Showdown" style="border-radius: 40px; max-width: 90%; height: auto; margin-top: 20px;">
+  <button onclick="startGame()" style="width: 200px; height: 64px; margin: 12px auto; display: block;">Старт</button>
+  <button onclick="showHelp()" style="width: 200px; height: 64px; margin: 12px auto; display: block;">Помощь</button>
+<p style="position: absolute; bottom: 10px; font-size: 12px; color: rgba(255,255,255,0.4); width: 100%; text-align: center;">Development: <a href="https://www.instagram.com/stepanov.design/" target="_blank" style="color: rgba(255,255,255,0.4); text-decoration: underline; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Anton Stepanov</a>, 2025 ©</p>
+</div>
+<div id="helpModal">
+  <h2>Правила игры</h2>
+  <p>🕹 <strong>Игрок 1</strong> нажимает <strong>Z</strong> или тапает по верхней части экрана, если видит <strong>цифру 1</strong></p>
+  <p>🕹 <strong>Игрок 2</strong> нажимает <strong>M</strong> или тапает по нижней части экрана, если видит <strong>цифру 2</strong></p>
+  <p>🚫 <strong>Нажал не на свою цифру</strong> или когда цифры нет — <strong>минус 1 очко</strong></p>
+  <p>💣 <strong>Нажал на 0</strong> — <strong>мгновенный проигрыш!</strong></p>
+  <p>🎯 Кто первым наберёт <strong>5 очков</strong> — побеждает! Или выигрывает тот, кто <strong>не нажал на 0</strong>, когда другой ошибся.</p>
+  <button onclick="hideHelp()">Назад</button>
+</div>
+<div id="winModal">
+  <h2 id="winMessage"></h2>
+  <button onclick="restartGame()">Реванш</button>
+  <button onclick="location.reload()">В меню</button>
+</div>
+<div id="gameScreen" style="display:none">
+    <div id="numberDisplay"></div>
+  <div id="score1" class="score">Игрок 1:
+  <svg id="dots1" width="120" height="20" style="vertical-align: middle;"></svg>
+</div>
+  <div id="score2" class="score">Игрок 2:
+  <svg id="dots2" width="120" height="20" style="vertical-align: middle;"></svg>
+</div>
+  <div id="controls">
+    <button class="control-btn" onclick="restartGame()">↻</button>
+    <button class="control-btn" onclick="toggleSound()" id="soundBtn">🔊</button>
   </div>
-  <div id="helpModal" style="display:none">...</div>
-  <div id="winModal" style="display:none">...</div>
-  <div id="gameScreen" style="display:none">...</div>
+  <div id="topZone" class="touchZone"></div>
+  <div id="bottomZone" class="touchZone"></div>
+</div>
+<script>
+let gameState = {
+  player1Score: 0,
+  player2Score: 0,
+  currentNumber: null,
+  isGameActive: false,
+  soundEnabled: true,
+  isMobile: /Mobi|Android/i.test(navigator.userAgent)
+};
+
+let numberEl = document.getElementById('numberDisplay');
+let timeoutIds = [];
+const colors = ['white', 'yellow', 'lightgreen', 'lightblue', 'pink'];
+let roundTimer;
+
+function startGame() {
+  renderDots(document.getElementById('dots1'), 0);
+  renderDots(document.getElementById('dots2'), 0);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  gameState.isGameActive = true;
+  showRandomNumber();
+  startRoundTimer();
+}
+
+function showHelp() {
+  document.getElementById('helpModal').style.display = 'flex';
+}
+
+function hideHelp() {
+  document.getElementById('helpModal').style.display = 'none';
+}
+
+function showRandomNumber() {
+  if (!gameState.isGameActive) return;
+  timeoutIds.forEach(clearTimeout);
+  timeoutIds = [];
+  let maxScore = Math.max(gameState.player1Score, gameState.player2Score);
+  let delay;
+  if (gameState.player1Score === 4 && gameState.player2Score === 4) {
+    delay = Math.random() * 100 + 300;
+  } else if (maxScore >= 4) {
+    delay = Math.random() * 200 + 400;
+  } else if (maxScore >= 3) {
+    delay = Math.random() * 200 + 600;
+  } else {
+    delay = Math.random() * 500 + 1000;
+  }
+  let timer = setTimeout(() => {
+    gameState.currentNumber = Math.floor(Math.random() * 6);
+    numberEl.textContent = gameState.currentNumber;
+    numberEl.style.color = colors[Math.floor(Math.random() * colors.length)];
+    numberEl.style.top = Math.random() * 70 + 10 + '%';
+    numberEl.style.left = Math.random() * 70 + 10 + '%';
+    numberEl.style.display = 'block';
+    numberEl.style.transform = 'scale(1.2)';
+    numberEl.style.transition = 'transform 0.1s ease';
+    setTimeout(() => numberEl.style.transform = 'scale(1)', 100);
+    let hideDuration;
+    if (gameState.currentNumber === 1 && gameState.player1Score === 4) {
+      hideDuration = Math.random() * 100 + 300;
+    } else if (gameState.currentNumber === 2 && gameState.player2Score === 4) {
+      hideDuration = Math.random() * 100 + 300;
+    } else {
+      hideDuration = Math.random() * 1000 + 1500;
+    }
+    let hideTimer = setTimeout(hideNumber, hideDuration);
+    timeoutIds.push(hideTimer);
+  }, delay);
+  timeoutIds.push(timer);
+}
+
+function hideNumber() {
+  gameState.currentNumber = null;
+  numberEl.style.display = 'none';
+  showRandomNumber();
+}
+
+function handlePlayerAction(player) {
+  if (!gameState.isGameActive) return;
+  let correct = false;
+  if (gameState.currentNumber === 0) {
+    endGame(player === 1 ? 2 : 1, 'другой игрок нажал на 0');
+    return;
+  }
+  if (player === 1 && gameState.currentNumber === 1) {
+    if (!correct && gameState.isMobile && navigator.vibrate) navigator.vibrate(100);
+    gameState.player1Score++;
+    correct = true;
+  } else if (player === 2 && gameState.currentNumber === 2) {
+    gameState.player2Score++;
+    correct = true;
+  } else {
+    if (player === 1) gameState.player1Score--;
+    else gameState.player2Score--;
+  }
+  updateScore();
+  playSound(correct);
+  flashPlayerZone(player, correct);
+  numberEl.style.display = 'none';
+  gameState.currentNumber = null;
+  if (gameState.player1Score >= 5) endGame(1, 'набрал 5 очков');
+  else if (gameState.player2Score >= 5) endGame(2, 'набрал 5 очков');
+  else showRandomNumber();
+}
+
+function updateScore() {
+  const dots1 = document.getElementById('dots1');
+  const dots2 = document.getElementById('dots2');
+  renderDots(dots1, gameState.player1Score);
+  renderDots(dots2, gameState.player2Score);
+
+  
+}
+
+function endGame(winner, reason) {
+  gameState.isGameActive = false;
+  timeoutIds.forEach(clearTimeout);
+  clearInterval(roundTimer);
+  const winMsg = document.getElementById('winMessage');
+  winMsg.textContent = `🏆 Победил Игрок ${winner}!
+Причина: ${reason}`;
+  winMsg.style.fontSize = '2em';
+  winMsg.style.textAlign = 'center';
+  winMsg.style.padding = '1em';
+  document.getElementById('winModal').style.display = 'flex';
+  winMsg.style.animation = 'winnerPulse 1s ease infinite alternate';
+  playFanfare();
+}
+
+function startRoundTimer() {
+  const timerEl = document.createElement('div');
+  timerEl.id = 'roundTimer';
+  timerEl.style.position = 'absolute';
+  timerEl.style.top = '50%';
+  timerEl.style.left = '50%';
+  timerEl.style.transform = 'translate(-50%, -50%)';
+  timerEl.style.fontSize = '2em';
+  timerEl.style.border = '2px solid rgba(255,255,255,0.5)';
+  timerEl.style.padding = '0.5em 1em';
+  timerEl.style.borderRadius = '48px';
+  timerEl.style.background = 'rgba(0,0,0,0.5)';
+  timerEl.style.color = 'rgba(255,255,255,0.5)';
+  timerEl.style.zIndex = '0';
+  document.getElementById('gameScreen').appendChild(timerEl);
+
+  let timeLeft = 60;
+  timerEl.textContent = `Осталось: ${timeLeft}`;
+  roundTimer = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `Осталось: ${timeLeft}`;
+    if (timeLeft <= 5 && gameState.soundEnabled) playMetronome();
+    if (timeLeft <= 0) {
+      clearInterval(roundTimer);
+      if (gameState.player1Score === gameState.player2Score) {
+        gameState.isGameActive = false;
+        timeoutIds.forEach(clearTimeout);
+        const winMsg = document.getElementById('winMessage');
+        winMsg.textContent = `🤝 Ничья!
+Оба игрока набрали одинаковое количество очков.`;
+        winMsg.style.fontSize = '2em';
+        winMsg.style.textAlign = 'center';
+        winMsg.style.padding = '1em';
+        document.getElementById('winModal').style.display = 'flex';
+        winMsg.style.animation = 'winnerPulse 1s ease infinite alternate';
+      } else {
+        const winner = gameState.player1Score > gameState.player2Score ? 1 : 2;
+        endGame(winner, 'по таймеру');
+      }
+    }
+  }, 1000);
+}
+
+function restartGame() {
+  gameState.player1Score = 0;
+  gameState.player2Score = 0;
+  updateScore();
+  gameState.isGameActive = true;
+  gameState.currentNumber = null;
+  numberEl.style.display = 'none';
+  timeoutIds.forEach(clearTimeout);
+  timeoutIds = [];
+  document.getElementById('winModal').style.display = 'none';
+  showRandomNumber();
+}
+
+function toggleSound() {
+  gameState.soundEnabled = !gameState.soundEnabled;
+  document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+}
+
+function playSound(success) {
+  if (!gameState.soundEnabled) return;
+  if (!window.sharedAudioCtx) window.sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let ctx = window.sharedAudioCtx;
+  let osc = ctx.createOscillator();
+  let gain = ctx.createGain();
+  osc.connect(gain).connect(ctx.destination);
+  if (success) {
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(1200, ctx.currentTime + 0.2);
+  } else {
+    osc.frequency.setValueAtTime(500, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.3);
+  }
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.4);
+}
+
+window.addEventListener('keydown', e => {
+  if (!gameState.isMobile) {
+    if (e.key.toLowerCase() === 'z') handlePlayerAction(1);
+    if (e.key.toLowerCase() === 'm') handlePlayerAction(2);
+  }
+});
+
+if (gameState.isMobile) {
+  document.getElementById('topZone').addEventListener('touchstart', () => handlePlayerAction(1));
+  document.getElementById('bottomZone').addEventListener('touchstart', () => handlePlayerAction(2));
+}
+
+function flashPlayerZone(player, success) {
+  const zone = document.getElementById(player === 1 ? 'topZone' : 'bottomZone');
+  const originalOpacity = zone.style.opacity;
+  zone.style.opacity = success ? 0.4 : 0.6;
+  setTimeout(() => zone.style.opacity = originalOpacity, 150);
+}
+
+function playFanfare() {
+  if (!gameState.soundEnabled) return;
+  const ctx = window.sharedAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  const freqs = [523, 659, 783, 1046];
+  freqs.forEach((f, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain).connect(ctx.destination);
+    osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.2);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.2);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.2 + 0.18);
+    osc.start(ctx.currentTime + i * 0.2);
+    osc.stop(ctx.currentTime + i * 0.2 + 0.2);
+  });
+}
+function playMetronome() {
+  const ctx = window.sharedAudioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain).connect(ctx.destination);
+  osc.frequency.setValueAtTime(1000, ctx.currentTime);
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+function renderDots(svg, score) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  for (let i = 0; i < 5; i++) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', 12 + i * 22);
+    circle.setAttribute('cy', 10);
+    circle.setAttribute('r', 8);
+    circle.setAttribute('fill', i < score ? 'limegreen' : 'rgba(255,255,255,0.3)');
+    svg.appendChild(circle);
+  }
+}
+
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('✅ Service Worker зарегистрирован'))
+    .catch(err => console.error('❌ Ошибка регистрации Service Worker:', err));
+}
+</script>
 </body>
 </html>
