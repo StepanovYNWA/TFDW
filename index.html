@@ -166,7 +166,7 @@ function endGame(winner, reason) {
   const winMsg = document.getElementById('winMessage');
   winMsg.textContent = `🏆 Победил Игрок ${winner}!
 Причина: ${reason}`;
-  winMsg.style.fontSize = '2em';
+  winMsg.style.fontSize = '1.5em';
   winMsg.style.textAlign = 'center';
   winMsg.style.padding = '1em';
   document.getElementById('winModal').style.display = 'flex';
@@ -181,7 +181,7 @@ function startRoundTimer() {
   timerEl.style.top = '50%';
   timerEl.style.left = '50%';
   timerEl.style.transform = 'translate(-50%, -50%)';
-  timerEl.style.fontSize = '2em';
+  timerEl.style.fontSize = '1em';
   timerEl.style.border = '2px solid rgba(255,255,255,0.5)';
   timerEl.style.padding = '0.5em 1em';
   timerEl.style.borderRadius = '48px';
@@ -204,7 +204,7 @@ function startRoundTimer() {
         const winMsg = document.getElementById('winMessage');
         winMsg.textContent = `🤝 Ничья!
 Оба игрока набрали одинаковое количество очков.`;
-        winMsg.style.fontSize = '2em';
+        winMsg.style.fontSize = '1.5em';
         winMsg.style.textAlign = 'center';
         winMsg.style.padding = '1em';
         document.getElementById('winModal').style.display = 'flex';
