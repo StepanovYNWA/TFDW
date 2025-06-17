@@ -38,8 +38,10 @@
   }
   #helpModal, #winModal {
     background: white;
+    max-width: 90vw !important;
     padding: 40px 24px 24px 24px;
     color: black;
+    box-sizing: border-box;
     display: none;
   }
   #gameScreen {
